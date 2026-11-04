@@ -13,3 +13,4 @@ A clean, minimalist art collection catalog app built with pure HTML, CSS, and mo
 
 ## Quick Start
 Open `index.html` directly in your browser.
+
