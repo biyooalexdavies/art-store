@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Art Collection</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-content">
+        <div>
+          <span class="eyebrow">Personal Gallery</span>
+          <h1>Art Collection</h1>
+        </div>
+        <div class="counter-badge" id="totalCountBadge" aria-live="polite">
+          <span class="counter-number" id="totalCount">0</span>
+          <span class="counter-label" id="counterLabel">Artworks</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Toolbar / Actions & Search -->
+    <section class="toolbar">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input 
+          type="search" 
+          id="searchInput" 
+          placeholder="Search by title, artist, medium, type..." 
+          aria-label="Search artworks"
+          autocomplete="off"
+        >
+        <button id="clearSearchBtn" class="clear-btn" aria-label="Clear search" title="Clear search" hidden>&times;</button>
+      </div>
+
+      <div class="filter-controls">
+        <select id="statusFilter" aria-label="Filter by availability">
+          <option value="all">All Availability</option>
+          <option value="In Stock">In Stock</option>
+          <option value="Sold Out">Sold Out</option>
+        </select>
+        
+        <button id="openAddModalBtn" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>Add Artwork</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Main List / Grid -->
+    <main>
+      <div id="artList" class="art-grid" role="list"></div>
+
+      <!-- Friendly Empty State (When zero items exist) -->
+      <div id="emptyState" class="empty-state" hidden>
+        <div class="empty-illustration">🎨</div>
+        <h2>Your collection is empty</h2>
+        <p>You haven't cataloged any artwork yet. Start building your personal gallery by adding your first piece.</p>
+        <button id="emptyAddBtn" class="btn btn-primary">Add Your First Artwork</button>
+      </div>
+
+      <!-- Search / Filter No Results State -->
+      <div id="noResultsState" class="empty-state empty-state-search" hidden>
+        <div class="empty-illustration">🔍</div>
+        <h2>No matching artworks found</h2>
+        <p>Try adjusting your search terms or clearing the filter.</p>
+        <button id="resetSearchBtn" class="btn btn-secondary">Reset Search & Filter</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add / Edit Modal -->
+  <div id="artworkModal" class="modal-backdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add New Artwork</h2>
+        <button id="closeModalBtn" class="close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <form id="artworkForm" novalidate>
+        <input type="hidden" id="artworkId">
+
+        <div class="form-group">
+          <label class="group-label">Artwork Image</label>
+          <div class="image-upload-wrapper">
+            <!-- Hidden file input -->
+            <input type="file" id="artworkImageInput" accept="image/*" class="visually-hidden">
+            
+            <!-- Upload placeholder / dropzone -->
+            <div id="imageUploadDropzone" class="image-dropzone" role="button" tabindex="0" aria-label="Upload artwork image">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+              <div class="dropzone-text">
+                <span class="dropzone-title">Click to upload photo</span>
+                <span class="dropzone-sub">PNG, JPG, WEBP or GIF</span>
+              </div>
+            </div>
+
+            <!-- Preview box when image is selected -->
+            <div id="imagePreviewBox" class="image-preview-box" hidden>
+              <img id="imagePreview" alt="Artwork preview" class="preview-img">
+              <button type="button" id="removeImageBtn" class="remove-image-btn" aria-label="Remove image" title="Remove image">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+                <span>Remove</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="artworkTitle">Title <span class="required">*</span></label>
+          <input type="text" id="artworkTitle" name="title" placeholder="e.g. Starry Night Over the Rhône" required>
+          <small class="error-msg" id="titleError"></small>
+        </div>
+
+        <div class="form-group">
+          <label for="artworkArtist">Artist <span class="required">*</span></label>
+          <input type="text" id="artworkArtist" name="artist" placeholder="e.g. Vincent van Gogh" required>
+          <small class="error-msg" id="artistError"></small>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="artworkType">Type</label>
+            <select id="artworkType" name="type">
+              <option value="Painting">Painting</option>
+              <option value="Sculpture">Sculpture</option>
+              <option value="Drawing">Drawing</option>
+              <option value="Print">Print</option>
+              <option value="Photography">Photography</option>
+              <option value="Mixed Media">Mixed Media</option>
+              <option value="Ceramic">Ceramic</option>
+              <option value="Digital">Digital Art</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="artworkYear">Year</label>
+            <input type="number" id="artworkYear" name="year" placeholder="e.g. 1888" min="1000" max="2100">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="artworkMedium">Medium</label>
+            <input type="text" id="artworkMedium" name="medium" placeholder="e.g. Oil on canvas, Bronze, Charcoal">
+          </div>
+
+          <div class="form-group">
+            <label for="artworkSize">Size</label>
+            <input type="text" id="artworkSize" name="size" placeholder="e.g. 72.5 × 92 cm or 24 × 36 in">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="group-label">Availability Status</label>
+          <div class="radio-options">
+            <label class="radio-card">
+              <input type="radio" name="status" value="In Stock" checked>
+              <span class="radio-pill in-stock">
+                <span class="dot"></span>
+                In Stock
+              </span>
+            </label>
+            <label class="radio-card">
+              <input type="radio" name="status" value="Sold Out">
+              <span class="radio-pill sold-out">
+                <span class="dot"></span>
+                Sold Out
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" id="cancelModalBtn" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="saveArtworkBtn" class="btn btn-primary">Save Artwork</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
